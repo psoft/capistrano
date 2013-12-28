@@ -129,7 +129,7 @@ module Capistrano
 
         # Performs a clone on the remote machine, then checkout on the branch
         # you want to deploy.
-        def checkout(revision, destination)
+        def checkout(revision, destination, branch=nil)
           git    = command
           remote = origin
 
@@ -143,7 +143,7 @@ module Capistrano
           execute << "#{git} clone #{verbose} #{args.join(' ')} #{variable(:repository)} #{destination}"
 
           # checkout into a local branch rather than a detached HEAD
-          execute << "cd #{destination} && #{git} checkout #{verbose} -b deploy #{revision}"
+          execute << "cd #{destination} && #{git} checkout #{verbose} #{branch}"
 
           if variable(:git_enable_submodules)
             execute << "#{git} submodule #{verbose} init"
@@ -167,7 +167,7 @@ module Capistrano
 
         # Merges the changes to 'head' since the last fetch, for remote_cache
         # deployment strategy
-        def sync(revision, destination)
+        def sync(revision, destination, branch)
           git     = command
           remote  = origin
 
@@ -186,7 +186,7 @@ module Capistrano
           end
 
           # since we're in a local branch already, just reset to specified revision rather than merge
-          execute << "#{git} fetch #{verbose} #{remote} && #{git} fetch --tags #{verbose} #{remote} && #{git} reset #{verbose} --hard #{revision}"
+          execute << "#{git} fetch #{verbose} #{remote} && #{git} fetch --tags #{verbose} #{remote} && #{git} checkout #{verbose} #{branch}" #" && #{git} reset #{verbose} --hard #{revision}"
 
           if variable(:git_enable_submodules)
             execute << "#{git} submodule #{verbose} init"
